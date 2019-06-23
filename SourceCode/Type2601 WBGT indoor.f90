@@ -13,7 +13,7 @@
 ! *** 
 ! *** Model Parameters 
 ! *** 
-!			Nb. of WBGT	- [1;+Inf]
+!			Nb. of WBGT	- [1;20]
 
 ! *** 
 ! *** Model Inputs 
@@ -55,14 +55,15 @@
 
       Double Precision Timestep,Time
       Integer CurrentUnit,CurrentType
-
+      Integer i, j
+      Integer, Parameter :: MaxWBGT=20  !maximum number of WBGTs per component
 
 !    PARAMETERS
-      DOUBLE PRECISION nWBGT
-
+      INTEGER nWBGT
+      
 !    INPUTS
-      DOUBLE PRECISION Wet_Bulb_temperature
-      DOUBLE PRECISION Globe_or_Operative_temperature
+      DOUBLE PRECISION wetbulbTemp(MaxWBGT)
+      DOUBLE PRECISION globeTemp(MaxWBGT)
 
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -99,15 +100,31 @@
 !-----------------------------------------------------------------------------------------------------------------------
 !Do All of the "Very First Call of the Simulation Manipulations" Here
       If(getIsFirstCallofSimulation()) Then
-
+        
+        !get the param1, number of WBGT.
+        nWBGT = JFIX(getParameterValue(1)+0.1)
+        if(nWBGT > MaxWBGT) then
+            Call FoundBadParameter(1,'Fatal','The number of the WBGT to be calculated must be between 1 and 20.')
+        endif
+        
 		!Tell the TRNSYS Engine How This Type Works
 		Call SetNumberofParameters(1)           !The number of parameters that the the model wants
-		Call SetNumberofInputs(2)                   !The number of inputs that the the model wants
-		Call SetNumberofDerivatives(0)         !The number of derivatives that the the model wants
-		Call SetNumberofOutputs(1)                 !The number of outputs that the the model produces
-		Call SetIterationMode(1)                             !An indicator for the iteration mode (default=1).  Refer to section 8.4.3.5 of the documentation for more details.
-		Call SetNumberStoredVariables(0,0)                   !The number of static variables that the model wants stored in the global storage array and the number of dynamic variables that the model wants stored in the global storage array
-		Call SetNumberofDiscreteControls(0)               !The number of discrete control functions set by this model (a value greater than zero requires the user to use Solver 1: Powell's method)
+		Call SetNumberofInputs(2*nWBGT)         !The number of inputs that the the model wants
+		Call SetNumberofDerivatives(0)          !The number of derivatives that the the model wants
+		Call SetNumberofOutputs(nWBGT)          !The number of outputs that the the model produces
+		Call SetIterationMode(1)                !An indicator for the iteration mode (default=1).  Refer to section 8.4.3.5 of the documentation for more details.
+		Call SetNumberStoredVariables(0,0)      !The number of static variables that the model wants stored in the global storage array and the number of dynamic variables that the model wants stored in the global storage array
+		Call SetNumberofDiscreteControls(0)     !The number of discrete control functions set by this model (a value greater than zero requires the user to use Solver 1: Powell's method)
+
+
+        !Set the Correct Input and Output Variable Types
+        do i=1, GetNumberofInputs()
+            Call SetInputUnits(i,'TE1') ![C]
+        end do
+        
+        do i=1, GetNumberofOutputs()
+            Call SetOutputUnits(i,'TE1') ![C]
+        end do
 
 		Return
 
@@ -118,18 +135,19 @@
 !Do All of the First Timestep Manipulations Here - There Are No Iterations at the Intial Time
       If (getIsStartTime()) Then
       nWBGT = getParameterValue(1)
-
-
-      Wet_Bulb_temperature = GetInputValue(1)
-      Globe_or_Operative_temperature = GetInputValue(2)
-
+      
+      do i=1, nWBGT
+        wetBulbTemp(i)  = GetInputValue(i*2-1)
+        globeTemp(i)    = GetInputValue(i*2)
+      end do
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-		Call SetOutputValue(1, 0) ! WBGT
-
+      do i=1, nWBGT   
+		Call SetOutputValue(1, 0.0) ! WBGT
+      end do
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
    !Sample Code: SetStaticArrayValue(1,0.d0)
@@ -149,15 +167,17 @@
 !ReRead the Parameters if Another Unit of This Type Has Been Called Last
       If(getIsReReadParameters()) Then
 		!Read in the Values of the Parameters from the Input File
-      Nb__of_WBGT = getParameterValue(1)
-
+        nWBGT = getParameterValue(1)
+        Call SetNumberofInputs(2*nWBGT)
 		
       EndIf
 !-----------------------------------------------------------------------------------------------------------------------
 
 !Read the Inputs
-      Wet_Bulb_temperature = GetInputValue(1)
-      Globe_or_Operative_temperature = GetInputValue(2)
+      do i=1, nWBGT
+        wetBulbTemp(i)  = GetInputValue(i*2-1)
+        globeTemp(i)    = GetInputValue(i*2)
+      end do
 		
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
@@ -202,8 +222,9 @@
 
 !-----------------------------------------------------------------------------------------------------------------------
 !Set the Outputs from this Model (#,Value)
-		Call SetOutputValue(1, 0) ! WBGT
-
+        do i=1, nWBGT
+		    Call SetOutputValue(i, 0.7*wetBulbTemp(i)+0.3*globeTemp(i) ) ! WBGT
+        end do
 !-----------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------
