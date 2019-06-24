@@ -1,6 +1,6 @@
 #ESI!
 4.0
-WBGT calculation for indoor
+Discomfort Index
 0
 
 Yuichi Yasuda
@@ -9,9 +9,9 @@ Yuichi Yasuda
 
 2
 2
-June 22, 2019
+6月 24, 2019
 
-June 22, 2019
+6月 24, 2019
 1
 
 noowner
@@ -19,8 +19,8 @@ __
 __
 __
 2
-屋内用のWBGTの計算を行うコンポーネント。
-湿球温度、黒球温度（もしくは作用温度）からWBGTを計算する
+室温と相対湿度から不快指数の計算を行う。
+DI = 0.81T + 0.01H × (0.99T - 14.3) + 46.3
 0
 0
 0
@@ -45,59 +45,10 @@ __
 __
 __
 4
-Wet Bulb temperature
+Nb. of discomfort index
 SN
 1
-湿球温度（Type56/TAIR_WB/Ntype 180より取得)
-simple
-real
-1
-+
--Inf
-+Inf
-[ ; ]
-0
-0
-C
-Temperature
-Globe or Operative temperature
-SN
-5
-黒球温度、もしくは作用温度（室内では作用温度を黒球温度相当として扱います）
-Type56/TOP/Ntype 122より取得
-
-
-
-simple
-real
-1
-+
--Inf
-+Inf
-[ ; ]
-0
-0
-C
-Temperature
-WBGT
-SN
-1
-室内の暑さ指数WBGTの計算結果
-simple
-real
-2
-+
--Inf
-+Inf
-[ ; ]
-0
-0
-C
-Temperature
-Nb. of WBGT
-SN
-1
-計算するWBGT数の指定
+計算を行う不快指数の数（最大20）
 simple
 integer
 3
@@ -109,6 +60,61 @@ integer
 0
 -
 Dimensionless
+Air temperature
+SN
+1
+不快指数を計算するZoneの室温[C]
+simple
+real
+1
++
+-Inf
++Inf
+[ ; ]
+20
+0
+C
+Temperature
+Relative Humidity
+SN
+1
+不快指数の計算を行うZoneの相対湿度[%]
+simple
+real
+1
++
+0.0
+100.0
+[ ; ]
+60
+0
+-
+Dimensionless
+Discomfort Index
+SN
+11
+不快指数
+
+     - 55  寒い
+55 - 60  肌寒い
+60 - 65  何も感じない
+65 - 70  快い
+70 - 75  暑くない
+75 - 80  やや暑い
+80 - 85  暑くて汗が出る
+85 -       暑くてたまらない
+
+simple
+real
+2
++
+-Inf
++Inf
+[ ; ]
+0
+0
+-
+Dimensionless
 0
 0
 0
@@ -117,7 +123,7 @@ Dimensionless
 
 *** trnModel specific properties ***
 9999
-2601
+2603
 
 9
 
@@ -220,16 +226,15 @@ Dimensionless
 
 
 0
-2
-WBGT
-Comfort Index
+1
+Discomfort Index
 0
 1
 1
 0
 1
 0
-Nb. of WBGT
+Nb. of discomfort index
 
 1
 100
@@ -243,7 +248,7 @@ Nb. of WBGT
 0
 0
 0
-Nb. of WBGT
+Nb. of discomfort index
 
 1
 100

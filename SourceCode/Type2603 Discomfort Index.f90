@@ -1,30 +1,30 @@
-      Subroutine Type2601
+      Subroutine Type2603
 
-! Object: WBGT calculation for indoor
-! Simulation Studio Model: Type2601 WBGT indoor
+! Object: Discomfort Index
+! Simulation Studio Model: Type2603 Discomfort Index
 ! 
 
 ! Author: Yuichi Yasuda
 ! Editor: 
-! Date:	 June 22, 2019
-! last modified: June 22, 2019
+! Date:	 June 24, 2019
+! last modified: June 24, 2019
 ! 
 ! 
 ! *** 
 ! *** Model Parameters 
 ! *** 
-!			Nb. of WBGT	- [1;20]
+!			Nb. of discomfort index	- [1;20]
 
 ! *** 
 ! *** Model Inputs 
 ! *** 
-!			Wet Bulb temperature	C [-Inf;+Inf]
-!			Globe or Operative temperature	C [-Inf;+Inf]
+!			Air temperature	C [-Inf;+Inf]
+!			Relative Humidity	- [0.0;100.0]
 
 ! *** 
 ! *** Model Outputs 
 ! *** 
-!			WBGT	C [-Inf;+Inf]
+!			Discomfort Index	- [-Inf;+Inf]
 
 ! *** 
 ! *** Model Derivatives 
@@ -47,7 +47,7 @@
 
 !-----------------------------------------------------------------------------------------------------------------------
 
-!DEC$Attributes DLLexport :: Type2601
+!DEC$Attributes DLLexport :: Type2603
 
 !-----------------------------------------------------------------------------------------------------------------------
 !Trnsys Declarations
@@ -56,14 +56,14 @@
       Double Precision Timestep,Time
       Integer CurrentUnit,CurrentType
       Integer i
-      Integer, Parameter :: MaxWBGT=20  !maximum number of WBGTs per component
+      Integer, Parameter :: MaxDI=20  !maximum number of DIs per component
 
 !    PARAMETERS
-      INTEGER nWBGT
+      INTEGER nDI
       
 !    INPUTS
-      DOUBLE PRECISION wetbulbTemp(MaxWBGT)
-      DOUBLE PRECISION globeTemp(MaxWBGT)
+      DOUBLE PRECISION Ta(MaxDI) !乾球温度[C]
+      DOUBLE PRECISION RH(MaxDI) !相対湿度[%]
 
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -100,21 +100,22 @@
 !-----------------------------------------------------------------------------------------------------------------------
 !Do All of the "Very First Call of the Simulation Manipulations" Here
       If(getIsFirstCallofSimulation()) Then
-        
-        !get the param1, number of WBGT.
-        nWBGT = JFIX(getParameterValue(1)+0.1)
-        if(nWBGT > MaxWBGT) then
-            Call FoundBadParameter(1,'Fatal','The number of the WBGT to be calculated must be between 1 and 20.')
+      
+        !get the param1, number of DI.
+        nDI = JFIX(getParameterValue(1)+0.1)
+        if(nDI > MaxDI) then
+            Call FoundBadParameter(1,'Fatal','The number of the DI to be calculated must be between 1 and 20.')
         endif
-        
+
 		!Tell the TRNSYS Engine How This Type Works
-		Call SetNumberofParameters(1)           !The number of parameters that the the model wants
-		Call SetNumberofInputs(2*nWBGT)         !The number of inputs that the the model wants
-		Call SetNumberofDerivatives(0)          !The number of derivatives that the the model wants
-		Call SetNumberofOutputs(nWBGT)          !The number of outputs that the the model produces
-		Call SetIterationMode(1)                !An indicator for the iteration mode (default=1).  Refer to section 8.4.3.5 of the documentation for more details.
-		Call SetNumberStoredVariables(0,0)      !The number of static variables that the model wants stored in the global storage array and the number of dynamic variables that the model wants stored in the global storage array
-		Call SetNumberofDiscreteControls(0)     !The number of discrete control functions set by this model (a value greater than zero requires the user to use Solver 1: Powell's method)
+		Call SetNumberofParameters(1)       !The number of parameters that the the model wants
+		Call SetNumberofInputs(2*nDI)       !The number of inputs that the the model wants
+		Call SetNumberofDerivatives(0)      !The number of derivatives that the the model wants
+		Call SetNumberofOutputs(nDI)        !The number of outputs that the the model produces
+		Call SetIterationMode(1)            !An indicator for the iteration mode (default=1).  Refer to section 8.4.3.5 of the documentation for more details.
+		Call SetNumberStoredVariables(0,0)  !The number of static variables that the model wants stored in the global storage array and the number of dynamic variables that the model wants stored in the global storage array
+		Call SetNumberofDiscreteControls(0) !The number of discrete control functions set by this model (a value greater than zero requires the user to use Solver 1: Powell's method)
+
 
         !Set the Correct Input and Output Variable Types
         do i=1, GetNumberofInputs()
@@ -133,20 +134,19 @@
 !-----------------------------------------------------------------------------------------------------------------------
 !Do All of the First Timestep Manipulations Here - There Are No Iterations at the Intial Time
       If (getIsStartTime()) Then
-        nWBGT = JFIX(getParameterValue(1)+0.1)
-      
-        do i=1, nWBGT
-            wetBulbTemp(i)  = GetInputValue(i*2-1)
-            globeTemp(i)    = GetInputValue(i*2)
-        end do
+      nDI = JFIX(getParameterValue(1)+0.1)
+
+
+      Air_temperature = GetInputValue(1)
+      Relative_Humidity = GetInputValue(2)
+
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-      do i=1, nWBGT   
-		Call SetOutputValue(1, 0.0) ! WBGT
-      end do
+		Call SetOutputValue(1, 0) ! Discomfort Index
+
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
    !Sample Code: SetStaticArrayValue(1,0.d0)
@@ -166,17 +166,15 @@
 !ReRead the Parameters if Another Unit of This Type Has Been Called Last
       If(getIsReReadParameters()) Then
 		!Read in the Values of the Parameters from the Input File
-        nWBGT = JFIX(getParameterValue(1)+0.1)
-        Call SetNumberofInputs(2*nWBGT)
+      nDI = JFIX(getParameterValue(1)+0.1)
+
 		
       EndIf
 !-----------------------------------------------------------------------------------------------------------------------
 
 !Read the Inputs
-      do i=1, nWBGT
-        wetBulbTemp(i)  = GetInputValue(i*2-1)
-        globeTemp(i)    = GetInputValue(i*2)
-      end do
+      Air_temperature = GetInputValue(1)
+      Relative_Humidity = GetInputValue(2)
 		
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
@@ -221,9 +219,8 @@
 
 !-----------------------------------------------------------------------------------------------------------------------
 !Set the Outputs from this Model (#,Value)
-        do i=1, nWBGT
-		    Call SetOutputValue(i, 0.7*wetBulbTemp(i)+0.3*globeTemp(i) ) ! WBGT
-        end do
+		Call SetOutputValue(1, 0) ! Discomfort Index
+
 !-----------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------
