@@ -1,6 +1,6 @@
 #ESI!
 4.0
-WBGT calculation for indoor
+WBGT calculation for outdoor
 0
 
 Yuichi Yasuda
@@ -9,9 +9,9 @@ Yuichi Yasuda
 
 2
 2
-June 22, 2019
+June 24, 2019
 
-June 22, 2019
+June 24, 2019
 1
 
 noowner
@@ -44,11 +44,11 @@ __
 __
 __
 __
-4
-Wet Bulb temperature
+5
+Ambient temperature
 SN
 1
-湿球温度（Type56/TAIR_WB/Ntype 180)
+外気温
 simple
 real
 1
@@ -56,15 +56,14 @@ real
 -Inf
 +Inf
 [ ; ]
-0
+20
 0
 C
 Temperature
-Globe or Operative temperature
+Relative humidity
 SN
-5
-黒球温度、もしくは作用温度（室内では作用温度を黒球温度相当として扱います）
-Type56/TOP/Ntype 122
+4
+相対湿度[%]
 
 
 
@@ -72,17 +71,18 @@ simple
 real
 1
 +
--Inf
-+Inf
+0
+100
 [ ; ]
+50
 0
-0
-C
-Temperature
+-
+Dimensionless
 WBGT
 SN
-1
-室内の暑さ指数WBGTの計算結果
+2
+屋外の暑さ指数WBGTの計算結果
+小野雅司ら(2014)：通常観測気象要素を用いたWBGTの推定．日生気誌，50(4)，147-157. doi:10.11227/seikisho.50.147
 simple
 real
 2
@@ -94,21 +94,36 @@ real
 0
 C
 Temperature
-Nb. of WBGT
+Wind speed
 SN
 1
-計算するWBGT数の指定
+風速[m/s]
 simple
-integer
-3
+real
+1
 +
-1
-20
-[ ; ]
-1
 0
--
-Dimensionless
++Inf
+[ ; ]
+0
+0
+m/s
+Velocity
+Total radiation on horizontal
+SN
+1
+水平面全天日射量[kJ/hm2]
+simple
+real
+1
++
+-Inf
++Inf
+[ ; ]
+0
+0
+kJ/hr.m^2
+Flux
 0
 0
 0
@@ -117,7 +132,7 @@ Dimensionless
 
 *** trnModel specific properties ***
 9999
-2601
+2602
 
 9
 
@@ -224,35 +239,21 @@ Dimensionless
 WBGT
 Comfort Index
 0
-1
-1
+3
 0
-1
-0
-Nb. of WBGT
-
-1
-100
 
 
 1
 100
 0
 0
-1
 0
-0
-0
-Nb. of WBGT
-
-1
-100
 
 
 1
 100
-0
-0
+-1
+-1
 0
 
 
