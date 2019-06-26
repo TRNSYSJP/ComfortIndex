@@ -62,8 +62,8 @@
       INTEGER nWBGT
       
 !    INPUTS
-      DOUBLE PRECISION wetbulbTemp(MaxWBGT)
-      DOUBLE PRECISION globeTemp(MaxWBGT)
+      DOUBLE PRECISION wetbulbTemp(MaxWBGT) !湿球温度[C]
+      DOUBLE PRECISION globeTemp(MaxWBGT)   !黒球温度（室内では作用温度）[C]
 
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -118,11 +118,11 @@
 
         !Set the Correct Input and Output Variable Types
         do i=1, GetNumberofInputs()
-            Call SetInputUnits(i,'TE1') ![C]
+            Call SetInputUnits(i,'TE1') !湿球温度、黒球温度（室内では作用温度）[C]
         end do
         
         do i=1, GetNumberofOutputs()
-            Call SetOutputUnits(i,'TE1') ![C]
+            Call SetOutputUnits(i,'TE1') !WBGT[C]
         end do
 
 		Return
