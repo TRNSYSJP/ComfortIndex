@@ -65,6 +65,9 @@
       DOUBLE PRECISION Ta(MaxDI) !乾球温度[C]
       DOUBLE PRECISION RH(MaxDI) !相対湿度[%]
 
+!    OUTPUTS
+      DOUBLE PRECISION DI !不快指数
+
 !-----------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------
@@ -104,7 +107,7 @@
         !get the param1, number of DI.
         nDI = JFIX(getParameterValue(1)+0.1)
         if(nDI > MaxDI) then
-            Call FoundBadParameter(1,'Fatal','The number of the DI to be calculated must be between 1 and 20.')
+            Call FoundBadParameter(1,'Fatal','The number of the Discomfort Index to be calculated must be between 1 and 20.')
         endif
 
 		!Tell the TRNSYS Engine How This Type Works
@@ -118,12 +121,13 @@
 
 
         !Set the Correct Input and Output Variable Types
-        do i=1, GetNumberofInputs()
-            Call SetInputUnits(i,'TE1') ![C]
+        do i=1, MaxDI
+            Call SetInputUnits(i*2-1,'TE1') !乾球温度（室温）[C]
+            Call SetInputUnits(i*2,'PC1') !相対湿度[%]
         end do
         
         do i=1, GetNumberofOutputs()
-            Call SetOutputUnits(i,'TE1') ![C]
+            Call SetOutputUnits(i,'DM1') !Discomfort Index[-]
         end do
 
 		Return
@@ -136,18 +140,18 @@
       If (getIsStartTime()) Then
       nDI = JFIX(getParameterValue(1)+0.1)
 
-
-      Air_temperature = GetInputValue(1)
-      Relative_Humidity = GetInputValue(2)
-
+      do i=1,nDI
+        Ta(i) = GetInputValue(i*2-1)
+        RH(i) = GetInputValue(i*2)
+      end do
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-		Call SetOutputValue(1, 0) ! Discomfort Index
-
-
+      do i=1, nDI   
+		    Call SetOutputValue(1, 0.0) ! Discomfort Index
+      end do
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
    !Sample Code: SetStaticArrayValue(1,0.d0)
 
@@ -166,15 +170,17 @@
 !ReRead the Parameters if Another Unit of This Type Has Been Called Last
       If(getIsReReadParameters()) Then
 		!Read in the Values of the Parameters from the Input File
-      nDI = JFIX(getParameterValue(1)+0.1)
+        nDI = JFIX(getParameterValue(1)+0.1)
 
 		
       EndIf
 !-----------------------------------------------------------------------------------------------------------------------
 
 !Read the Inputs
-      Air_temperature = GetInputValue(1)
-      Relative_Humidity = GetInputValue(2)
+      do i=1,nDI
+        Ta(i) = GetInputValue(i*2-1)
+        RH(i) = GetInputValue(i*2)
+      end do
 		
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
@@ -219,8 +225,11 @@
 
 !-----------------------------------------------------------------------------------------------------------------------
 !Set the Outputs from this Model (#,Value)
-		Call SetOutputValue(1, 0) ! Discomfort Index
-
+     !DI＝0.81T＋0.01H(0.99T-14.3)＋46.3
+     do i=1, nDI
+        DI = 0.81*Ta(i)+0.01*RH(i)*(0.99*Ta(i)-14.3)+46.3 !Discomfort Index
+		Call SetOutputValue(i, DI) 
+     end do
 !-----------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------
