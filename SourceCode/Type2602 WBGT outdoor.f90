@@ -112,6 +112,14 @@
 		Call SetNumberStoredVariables(0,0)  !The number of static variables that the model wants stored in the global storage array and the number of dynamic variables that the model wants stored in the global storage array
 		Call SetNumberofDiscreteControls(0) !The number of discrete control functions set by this model (a value greater than zero requires the user to use Solver 1: Powell's method)
 
+        Call SetInputUnits(1,'TE1') !乾球温度(外気温）[C]
+        Call SetInputUnits(2,'PC1') !相対湿度[%]
+        Call SetInputUnits(3,'VE1') !風速[m/s]
+        Call SetInputUnits(4,'IR1') !全天日射量[kJ/hm2]
+        
+        Call SetOutputUnits(1,'TE1') !WBGT[C]
+
+
 		Return
 
       EndIf
@@ -131,7 +139,7 @@
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-		Call SetOutputValue(1, 0) ! WBGT
+		Call SetOutputValue(1, 0.0) ! WBGT
 
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
