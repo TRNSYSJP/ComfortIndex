@@ -140,23 +140,22 @@
       If (getIsStartTime()) Then
       nDI = JFIX(getParameterValue(1)+0.1)
 
-      !do i=1,nDI
-      !  Ta(i) = GetInputValue(i*2-1)
-      !  RH(i) = GetInputValue(i*2)
-      !end do
-      
-      do i=1, nDI
-        DI = 0.81*Ta(i)+0.01*RH(i)*(0.99*Ta(i)-14.3)+46.3 !Discomfort Index
-		Call SetOutputValue(i, DI) 
+      do i=1,nDI
+        Ta(i) = GetInputValue(i*2-1)
+        RH(i) = GetInputValue(i*2)
       end do
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-      do i=1, nDI   
-		    Call SetOutputValue(1, 0.0) ! Discomfort Index
-      end do
+      !do i=1, nDI   
+	  !	    Call SetOutputValue(1, 0.0) ! Discomfort Index
+      !end do
+      do i=1, nDI
+        DI = 0.81*Ta(i)+0.01*RH(i)*(0.99*Ta(i)-14.3)+46.3 !Discomfort Index
+		Call SetOutputValue(i, DI) 
+      end do      
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
    !Sample Code: SetStaticArrayValue(1,0.d0)
 
