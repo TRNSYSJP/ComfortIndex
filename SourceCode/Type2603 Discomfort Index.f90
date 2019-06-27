@@ -121,7 +121,7 @@
 
 
         !Set the Correct Input and Output Variable Types
-        do i=1, MaxDI
+        do i=1, nDI
             Call SetInputUnits(i*2-1,'TE1') !乾球温度（室温）[C]
             Call SetInputUnits(i*2,'PC1') !相対湿度[%]
         end do
@@ -140,9 +140,14 @@
       If (getIsStartTime()) Then
       nDI = JFIX(getParameterValue(1)+0.1)
 
-      do i=1,nDI
-        Ta(i) = GetInputValue(i*2-1)
-        RH(i) = GetInputValue(i*2)
+      !do i=1,nDI
+      !  Ta(i) = GetInputValue(i*2-1)
+      !  RH(i) = GetInputValue(i*2)
+      !end do
+      
+      do i=1, nDI
+        DI = 0.81*Ta(i)+0.01*RH(i)*(0.99*Ta(i)-14.3)+46.3 !Discomfort Index
+		Call SetOutputValue(i, DI) 
       end do
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
