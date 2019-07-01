@@ -57,6 +57,7 @@
       Double Precision Timestep,Time
       Integer CurrentUnit,CurrentType
       DOUBLE PRECISION wbgt ! WBGT
+      DOUBLE PRECISION SR_kW !全天日射量[kW/m2]
 
 
 !    PARAMETERS
@@ -129,18 +130,21 @@
 !Do All of the First Timestep Manipulations Here - There Are No Iterations at the Intial Time
       If (getIsStartTime()) Then
 
-      Ta = GetInputValue(1)
-      RH = GetInputValue(2)
-      WS = GetInputValue(3)
-      SR = GetInputValue(4)
+      Ta = GetInputValue(1)!乾球温度[C]
+      RH = GetInputValue(2)!相対湿度[%]
+      WS = GetInputValue(3)!風速[m/s]
+      SR = GetInputValue(4)!全天日射量[kJ/hm2]
+      SR_kW = SR/3600.0    ! kJ/hm2 to W/m2
 
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-		Call SetOutputValue(1, 0.0) ! WBGT
-
+		!Call SetOutputValue(1, 0.0) ! WBGT
+        !WBGT = 0.735*Tamb + 0.0374 * RH+  0.00292*Tamb*  RH  +7.619* SR_kW-4.557*  SR_kW*SR_kW-0.0572*WS-4.064
+        wbgt = 0.735 * Ta + 0.0374 * RH + 0.00292 * Ta * RH + 7.619 * SR_kW - 4.577 * SR_kW**2 - 0.0572 * WS - 4.064
+		Call SetOutputValue(1, wbgt) ! WBGT
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
    !Sample Code: SetStaticArrayValue(1,0.d0)
@@ -166,11 +170,11 @@
 !-----------------------------------------------------------------------------------------------------------------------
 
 !Read the Inputs
-      Ta = GetInputValue(1)
-      RH = GetInputValue(2)
-      WS = GetInputValue(3)
-      SR = GetInputValue(4)
-		
+      Ta = GetInputValue(1)!乾球温度[C]
+      RH = GetInputValue(2)!相対湿度[%]
+      WS = GetInputValue(3)!風速[m/s]
+      SR = GetInputValue(4)!全天日射量[kJ/hm2]
+      SR_kW = SR/3600.0    ! kJ/hm2 to W/m2
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
 	!Sample Code: If( IN1 <= 0.) Call FoundBadInput(1,'Fatal','The first input provided to this model is not acceptable.')
@@ -214,7 +218,7 @@
 
 !-----------------------------------------------------------------------------------------------------------------------
 !Set the Outputs from this Model (#,Value)
-        wbgt = 0.735 * Ta + 0.0374 * RH + 0.00292 * Ta * RH + 7.619 * SR - 4.577 * SR**2 - 0.0572 * WS - 4.064
+        wbgt = 0.735 * Ta + 0.0374 * RH + 0.00292 * Ta * RH + 7.619 * SR_kW - 4.577 * SR_kW**2 - 0.0572 * WS - 4.064
 		Call SetOutputValue(1, wbgt) ! WBGT
 
 !-----------------------------------------------------------------------------------------------------------------------
