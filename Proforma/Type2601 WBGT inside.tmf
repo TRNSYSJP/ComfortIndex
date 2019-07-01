@@ -81,8 +81,9 @@ C
 Temperature
 WBGT
 SN
-1
-室内の暑さ指数WBGTの計算結果
+2
+室内の暑さ指数WBGTの計算結果
+室内のWBGT(℃) ＝0.7 × 湿球温度(℃) ＋ 0.3 × 黒球温度(℃)
 simple
 real
 2
