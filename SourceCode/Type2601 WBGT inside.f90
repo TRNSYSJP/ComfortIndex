@@ -145,7 +145,8 @@
 
    !Set the Initial Values of the Outputs (#,Value)
       do i=1, nWBGT   
-		Call SetOutputValue(1, 0.0) ! WBGT
+		!Call SetOutputValue(1, 0.0) ! WBGT
+        Call SetOutputValue(i, 0.7*wetBulbTemp(i)+0.3*globeTemp(i) ) ! WBGT
       end do
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
