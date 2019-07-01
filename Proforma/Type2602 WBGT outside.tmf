@@ -78,8 +78,8 @@ real
 [ ; ]
 60
 0
--
-Dimensionless
+% (base 100)
+Percentage
 WBGT
 SN
 2
